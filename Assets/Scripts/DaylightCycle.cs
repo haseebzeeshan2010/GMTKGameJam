@@ -1,7 +1,8 @@
 using System.Collections;
 using UnityEngine;
+using Unity.Netcode;
 
-public class DaylightCycle : MonoBehaviour
+public class DaylightCycle : NetworkBehaviour
 {
     // Reference to the 3D light to be animated.
     [SerializeField] private Light directionalLight;
@@ -25,6 +26,28 @@ public class DaylightCycle : MonoBehaviour
     [SerializeField] private float duration = 10f;
 
     public void OnUIButtonClick()
+    {
+        if (IsServer)
+        {
+            // If we're the server, directly trigger the ClientRpc
+            AnimateLightClientRpc();
+        }
+        else if (IsClient)
+        {
+            // If we're a client, ask the server to trigger it
+            RequestLightAnimationServerRpc();
+        }
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void RequestLightAnimationServerRpc()
+    {
+        // Server receives the request and broadcasts to all clients
+        AnimateLightClientRpc();
+    }
+
+    [ClientRpc]
+    private void AnimateLightClientRpc()
     {
         if (directionalLight != null)
         {
