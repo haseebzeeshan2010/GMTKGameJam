@@ -121,14 +121,17 @@ public class TagStarter : MonoBehaviour
         var players = new List<Player>();
         
         // CORE ITERATION: Use NGO 2.4.1 ConnectedClientsList for reliable client enumeration
-        foreach (var client in NetworkManager.Singleton.ConnectedClientsList)
+        // CORE SEARCH: Find all Player components in spawned network objects
+        foreach (var networkObject in NetworkManager.Singleton.SpawnManager.SpawnedObjectsList)
         {
             // CORE COMPONENT ACCESS: Safe component retrieval with null-conditional operator
-            if (client.PlayerObject?.GetComponent<Player>() is Player player)
+            if (networkObject?.GetComponent<Player>() is Player player)
             {
-                players.Add(player);
+            players.Add(player);
             }
         }
+
+
         
         return players;
     }
@@ -173,6 +176,7 @@ public class TagStarter : MonoBehaviour
                 return true;
         }
         
+
         // CORE EDGE CASE: Return true if no players to avoid unnecessary tagging
         return players.Count == 0;
     }

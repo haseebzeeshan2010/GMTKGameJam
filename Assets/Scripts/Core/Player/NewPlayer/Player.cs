@@ -32,7 +32,7 @@ public class Player : NetworkBehaviour
     [SerializeField] private GameObject TagBlock;
 
     // Bot mode toggle from inspector
-    [SerializeField] private bool isBot = false;
+    [SerializeField] public bool isBot = false;
 
     private void Awake()
     {
@@ -46,7 +46,7 @@ public class Player : NetworkBehaviour
             if (isBot)
             {
                 // Randomly select a bot name from a predefined list.
-                string[] botNames = new string[] { "Alpha", "Bravo", "Charlie", "Delta", "Echo" };
+                string[] botNames = new string[] { "AlphaBot", "BravoBot", "CharlieBot", "DeltaBot", "EchoBot" };
                 int randomIndex = UnityEngine.Random.Range(0, botNames.Length);
                 PlayerName.Value = botNames[randomIndex];
             }

@@ -21,10 +21,13 @@ public class Leaderboard : NetworkBehaviour
     [Header("Player Connection Check")]
     [SerializeField] private float connectionCheckInterval = 2f; // Check every 2 seconds
 
-    private NetworkList<LeaderboardEntityState> leaderboardEntities;
+    public NetworkList<LeaderboardEntityState> leaderboardEntities { get; private set; }
     private List<LeaderboardEntityDisplay> entityDisplays = new List<LeaderboardEntityDisplay>();
     private Sequence currentAnimationSequence;
     private Coroutine connectionCheckCoroutine;
+    
+    // Dictionary to store event handlers for proper subscription/unsubscription
+    private Dictionary<ulong, NetworkVariable<float>.OnValueChangedDelegate> tagTimeHandlers = new Dictionary<ulong, NetworkVariable<float>.OnValueChangedDelegate>();
 
     private void Awake()
     {
@@ -55,8 +58,8 @@ public class Leaderboard : NetworkBehaviour
             Player[] existingPlayers = FindObjectsByType<Player>(FindObjectsSortMode.None);
             foreach (Player player in existingPlayers)
             {
+                Debug.Log($"Registering existing player {player.OwnerClientId} to leaderboard");
                 HandlePlayerSpawned(player);
-                Debug.Log($"Existing player {player.PlayerName.Value} registered in leaderboard.");
             }
 
             // Subscribe to player lifecycle events
@@ -90,6 +93,9 @@ public class Leaderboard : NetworkBehaviour
             Player.OnPlayerSpawned -= HandlePlayerSpawned;
             Player.OnPlayerDespawned -= HandlePlayerDespawned;
         }
+        
+        // Clear the tag time handlers dictionary
+        tagTimeHandlers.Clear();
     }
 
     private IEnumerator CheckPlayerConnections()
@@ -102,6 +108,9 @@ public class Leaderboard : NetworkBehaviour
             for (int i = leaderboardEntities.Count - 1; i >= 0; i--)
             {
                 ulong clientId = leaderboardEntities[i].ClientId;
+                
+                // Skip bot check (they use clientId 100)
+                if (clientId == 100) continue;
 
                 // Check if player is still connected using NetworkManager
                 if (!NetworkManager.Singleton.ConnectedClients.ContainsKey(clientId))
@@ -120,41 +129,58 @@ public class Leaderboard : NetworkBehaviour
         TagCounter tagCounter = player.GetComponent<TagCounter>();
         if (tagCounter == null)
         {
-            Debug.LogWarning($"Player {player.OwnerClientId} spawned without TagCounter component!");
+            Debug.LogWarning($"Player {player.PlayerName.Value} spawned without TagCounter component!");
             return;
         }
-
-        // Add player to leaderboard with initial tag time
+        
+        // Determine the clientId (100 for bots, regular clientId for players)
+        ulong clientId = player.isBot ? 100 : player.OwnerClientId;
+        
+        // Create the handler and store it in the dictionary
+        NetworkVariable<float>.OnValueChangedDelegate handler = (oldTime, newTime) => HandleTagTimeChanged(clientId, newTime);
+        
+        // Store the handler for later unsubscription
+        tagTimeHandlers[clientId] = handler;
+        
+        // Add to leaderboard
         leaderboardEntities.Add(new LeaderboardEntityState
         {
-            ClientId = player.OwnerClientId,
+            ClientId = clientId,
             PlayerName = player.PlayerName.Value,
             TagTimed = Mathf.FloorToInt(tagCounter.TotalTaggedTime)
         });
-
-        // Subscribe to tag time changes for this player
-        tagCounter.totalTaggedTime.OnValueChanged += (oldTime, newTime) =>
-            HandleTagTimeChanged(player.OwnerClientId, newTime);
+        
+        // Subscribe using the stored handler
+        tagCounter.totalTaggedTime.OnValueChanged += handler;
+        
+        Debug.Log($"Added {(player.isBot ? "bot" : "player")} to leaderboard with ID {clientId}, name {player.PlayerName.Value}, tag time {tagCounter.TotalTaggedTime}");
     }
 
     private void HandlePlayerDespawned(Player player)
     {
         TagCounter tagCounter = player.GetComponent<TagCounter>();
         if (tagCounter == null) return;
-
+        
+        // Use the same clientId logic as in HandlePlayerSpawned
+        ulong clientId = player.isBot ? 100 : player.OwnerClientId;
+        
         // Remove player from leaderboard
         for (int i = leaderboardEntities.Count - 1; i >= 0; i--)
         {
-            if (leaderboardEntities[i].ClientId == player.OwnerClientId)
+            if (leaderboardEntities[i].ClientId == clientId)
             {
                 leaderboardEntities.RemoveAt(i);
                 break;
             }
         }
-
-        // Unsubscribe from tag time changes
-        tagCounter.totalTaggedTime.OnValueChanged -= (oldTime, newTime) =>
-            HandleTagTimeChanged(player.OwnerClientId, newTime);
+        
+        // Get the stored handler from the dictionary and unsubscribe properly
+        if (tagTimeHandlers.TryGetValue(clientId, out var handler))
+        {
+            tagCounter.totalTaggedTime.OnValueChanged -= handler;
+            tagTimeHandlers.Remove(clientId);
+            Debug.Log($"Removed {(player.isBot ? "bot" : "player")} from leaderboard with ID {clientId}");
+        }
     }
 
     private void HandleTagTimeChanged(ulong clientId, float newTagTime)
@@ -170,8 +196,12 @@ public class Leaderboard : NetworkBehaviour
                 PlayerName = leaderboardEntities[i].PlayerName,
                 TagTimed = Mathf.FloorToInt(newTagTime)
             };
+            
+            Debug.Log($"Updated tag time for {(clientId == 100 ? "bot" : "player")} with ID {clientId} to {newTagTime}");
             return;
         }
+        
+        Debug.LogWarning($"Failed to update tag time for client {clientId}: not found in leaderboard");
     }
 
     private void HandleLeaderboardEntitiesChanged(NetworkListEvent<LeaderboardEntityState> changeEvent)

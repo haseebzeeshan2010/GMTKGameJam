@@ -162,7 +162,7 @@ Material:
     - _RefractionAmount: 0.05
     - _RefractionSpeed: 2
     - _RefractionStrength: 0.13
-    - _Refraction_Strength: 0.177
+    - _Refraction_Strength: 0.235
     - _RimRize: 1
     - _RimTiling: -0.21
     - _RippleDensity: 1

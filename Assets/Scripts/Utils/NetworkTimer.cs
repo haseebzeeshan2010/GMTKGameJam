@@ -15,6 +15,8 @@ public class NetworkTimer : NetworkBehaviour
     [SerializeField] private GameObject TimerStartButton;    // UI button for host to start timer
     [SerializeField] private GameObject TimerVisibility;     // Container for timer UI
 
+    [SerializeField] private FadeUI fadeUI; // Reference to the FadeUI component for transitions
+
     private readonly NetworkVariable<double> _endTime = new NetworkVariable<double>(
         0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
@@ -119,7 +121,15 @@ public class NetworkTimer : NetworkBehaviour
         if (IsHost)
         {
             _isTimerRunning.Value = false;
+            // Server triggers the fade on all clients via RPC
+            FadeInAllClientRpc();
         }
-        // Add any client-side end-of-timer logic here.
+    }
+
+    [ClientRpc]
+    private void FadeInAllClientRpc()
+    {
+
+        fadeUI.FadeIn();
     }
 }

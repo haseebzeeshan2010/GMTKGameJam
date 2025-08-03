@@ -10,9 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 6923102742358224224}
   - component: {fileID: 2852455260960026141}
-  - component: {fileID: 2763976723235968607}
+  - component: {fileID: 5413510168857594084}
   - component: {fileID: 5918361818203140721}
-  - component: {fileID: 8464439943891118753}
   m_Layer: 0
   m_Name: FollowCam
   m_TagString: Untagged
@@ -28,8 +27,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 204358857353426017}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.25053862, y: 0.661234, z: -0.25053862, w: 0.661234}
-  m_LocalPosition: {x: -3.8200002, y: 3.58, z: 0}
+  m_LocalRotation: {x: 0.38517356, y: -0.000000040576644, z: 0.000000016935742, w: 0.9228442}
+  m_LocalPosition: {x: 0, y: 2.94, z: -3.0733335}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -78,7 +77,7 @@ MonoBehaviour:
       BarrelClipping: 0.25
       Anamorphism: 0
   BlendHint: 0
---- !u!114 &2763976723235968607
+--- !u!114 &5413510168857594084
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -92,11 +91,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TrackerSettings:
     BindingMode: 4
-    PositionDamping: {x: 1, y: 0.2, z: 1}
+    PositionDamping: {x: 1, y: 0.5, z: 0.2}
     AngularDampingMode: 0
     RotationDamping: {x: 1, y: 1, z: 1}
     QuaternionDamping: 1
-  FollowOffset: {x: -5.73, y: 5.37, z: 0}
+  FollowOffset: {x: 0, y: 4.41, z: -4.61}
 --- !u!114 &5918361818203140721
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -119,27 +118,13 @@ MonoBehaviour:
       Size: {x: 0.8, y: 0.8}
       Offset: {x: 0, y: 0}
   CenterOnActivate: 1
-  TargetOffset: {x: 0, y: 0.3, z: 0}
-  Damping: {x: 1.5, y: 1.5}
+  TargetOffset: {x: 0, y: -0.25, z: 0}
+  Damping: {x: 7, y: 0.5}
   Lookahead:
     Enabled: 0
     Time: 0
     Smoothing: 0
     IgnoreY: 0
---- !u!114 &8464439943891118753
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 204358857353426017}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 31e3325557640ba479df49be023a103e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  splineDolly: {fileID: 0}
-  splineContainer: {fileID: 0}
 --- !u!1 &707149894060409195
 GameObject:
   m_ObjectHideFlags: 0
@@ -404,7 +389,6 @@ MonoBehaviour:
   animator: {fileID: 8623831272579412928}
   movementSpeed: 10
   accelerationSmoothTime: 0.15
-  cameraTransform: {fileID: 6923102742358224224}
   MovementDirection: {x: 0, y: 0, z: 0}
   MovementSpeed: 0
   IsMoving:
@@ -460,7 +444,6 @@ MonoBehaviour:
   TagStatus:
     m_InternalValue: 0
   TagBlock: {fileID: 6130229700567556465}
-  isBot: 0
 --- !u!136 &1576327880018846443
 CapsuleCollider:
   m_ObjectHideFlags: 0
