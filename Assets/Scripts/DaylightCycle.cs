@@ -32,18 +32,7 @@ public class DaylightCycle : NetworkBehaviour
             // If we're the server, directly trigger the ClientRpc
             AnimateLightClientRpc();
         }
-        else if (IsClient)
-        {
-            // If we're a client, ask the server to trigger it
-            RequestLightAnimationServerRpc();
-        }
-    }
-
-    [ServerRpc(RequireOwnership = false)]
-    private void RequestLightAnimationServerRpc()
-    {
-        // Server receives the request and broadcasts to all clients
-        AnimateLightClientRpc();
+        
     }
 
     [ClientRpc]
